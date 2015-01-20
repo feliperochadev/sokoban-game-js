@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset=utf-8 />
+
+  <title>Sōkoban Game</title>
+  
+  <link rel="stylesheet" media="screen" href="css/screen.css">
+  <link rel="stylesheet" media="screen" href="css/sokoban.css">
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script>
+      function nextLevel()
+      {
+        var currentId = $('.current').attr('id');
+        if($('.soko-solved').length != $('div[id^="level"]').length)
+        {
+          alert('congratulations! lets go to the next level!');
+          var elements = $('div[id^="level"]');
+          var lastChar = currentId.substr(currentId.length - 1);
+          var nextId = 'level'+(parseInt(lastChar)+1);
+          for(var i = 1; i <= elements.length; i++)
+          {
+            if(elements[i-1].id == nextId)
+            {
+              $('#level'+(i)).css('display', 'inline');
+              $('#level'+(i)).addClass("current");
+            }
+            else
+            {
+              $('#level'+(i)).css('display', 'none');
+              $('#level'+(i)).removeClass("current");
+            }
+          }
+        }
+        else
+        {
+          alert('congratulations! you finished the game :)');
+        }
+        $('#levelselect option:contains("Select Level")').prop('selected', true);
+      }
+  </script>
+  <script src="js/jquery.processEach.js"></script>
+  <script src="js/jquery.sokoban.js"></script>
+</head>
+<body>
+<div id="top">
+<div id="game">
+<pre>
+<h1>Sokoban Game</h1>
+</pre>
+<br/>
+<select id="levelselect">
+  <option value="0">Select Level...
+  </option>
+  <option value="1">Level 1
+  </option>
+  <option value="2">Level 2
+  </option>
+  <option value="3">Level 3
+  </option>
+</select>
+<button value="Reset Level" id="resetLevelButton" onclick="return confirm('Are you sure?');">Reset Level</button>
+<button value="Reset Level" id="resetGameButton" onclick="return confirm('Are you sure?');">Reset Game</button>
+<div id="level1">
+<hr>
+  <h1>Level 1</h1>
+<pre class="sokoban level" >
+####
+# .#
+#  ###
+#*@  #
+#  $ #
+#  ###
+####
+</pre>
+</div>
+<div id="level2">
+<hr>
+    <h1>Level 2</h1>
+<pre class="sokoban level">
+
+######
+#    #
+# #@ #
+# $* #
+# .* #
+#    #
+######
+</pre>
+</div>
+<div id="level3">
+<hr>
+    <h1>Level 3</h1>
+<pre class="sokoban level">
+
+  ####
+###  ####
+#     $ #
+# #  #$ #
+# . .#@ #
+#########
+</pre>
+</div>
+<hr>
+</div>
+
+<div id="footer">
+</div>
+
+</div>
+  <script>
+  var originalLevels = new Array();
+        function BindLevel()
+      {
+      var levels = $( 'pre.sokoban.level' );
+      for(var i = 0; i < levels.length; i++)
+      {
+        originalLevels[i] = levels[i].innerText;
+      }
+
+      levels
+        .processEach(function(){
+          $( this ).sokoban();
+        })
+        .bind( 'keydown', function (e) {
+          if ( e.keyCode == 9 ) { // tab
+            var i = (levels.length + ( levels.index( this ) + (e.shiftKey ? -1 : 1) ) ) % levels.length;
+            var o = levels.eq( i ).find( '.soko-room:first' ).focus();
+            $( window ).scrollTop( levels.eq( i ).offset().top );
+          }
+        })
+        .eq( 0 )
+          .find( '.soko-room:first' )
+          .focus()
+          ;
+      }
+   
+    jQuery(function(){ 
+      BindLevel();
+        var elements = $('div[id^="level"]');
+        for(var i = 1; i <= elements.length; i++)
+        {
+          if(i > 1)
+          {
+              $('#level'+(i)).css('display', 'none');
+          }
+          else
+          {
+              $('#level'+(i)).addClass("current");
+              $('#level'+(i)).css('display', 'inline');
+          }
+        }
+  });
+
+    $(document).ready(function() {
+    $('#resetLevelButton').on('click', function()
+    {
+      alert("Level Reset!");
+      var currentId = $('.current').attr('id');
+      $('#'+currentId+' > pre').removeClass('soko-solved');
+      var lastChar = currentId.substr(currentId.length - 1);
+      var currentLevel = parseInt(lastChar);
+      var elements = $('div[id^="level"]');
+      for(var i = 0; i < elements.length; i++)
+      {
+        $('#level'+(i+1)).css('display', 'inline');
+      }
+      setTimeout(function(){
+      $('pre.sokoban').sokoban(originalLevels, true, currentLevel);
+      var currentId = $('.current').attr('id');
+      for(var i = 0; i < elements.length; i++)
+      {
+        if(elements[i].id == currentId)
+        {
+          $('#level'+(i+1)).css('display', 'inline');
+          $('#level'+(i+1)).addClass("current");
+        }
+        else
+        {
+          $('#level'+(i+1)).css('display', 'none');
+          $('#level'+(i+1)).removeClass("current");
+        }
+      }
+    },10);     
+    });
+    
+
+    $('#resetGameButton').on('click', function()
+    {
+      alert("Game Reset!");
+      $('div > pre').removeClass('soko-solved');
+      var elements = $('div[id^="level"]');
+      for(var i = 0; i < elements.length; i++)
+      {
+        $('#level'+(i+1)).css('display', 'inline');
+      }
+      $('#levelselect option:contains("0")').prop('selected', true);
+      debugger;
+      setTimeout(function(){
+      $('pre.sokoban').sokoban(originalLevels, true);
+      for(var i = 0; i < elements.length; i++)
+      {
+        if(i > 0)
+        {
+          $('#level'+(i+1)).css('display', 'none');
+          $('#level'+(i+1)).removeClass("current");
+        }
+        else
+        {
+          $('#level'+(i+1)).css('display', 'inline');
+          $('#level'+(i+1)).addClass("current");
+        }
+      }
+    },10)
+    });
+
+    $('#levelselect').change(function ()
+    {
+      if($('#levelselect option:selected').val() != "select")
+      {
+        var elements = $('div[id^="level"]');
+        for(var i = 1; i <= elements.length; i++)
+        {
+          if($('#levelselect option:selected').val() == i)
+          {
+              $('#level'+(i)).addClass("current");
+              $('#level'+(i)).css('display', 'inline');
+          }
+          else
+          {
+              $('#level'+(i)).removeClass("current");
+              $('#level'+(i)).css('display', 'none');
+          }
+        }
+      }
+    });
+
+  });
+  </script>
+</body>
+</html>
